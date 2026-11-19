@@ -19,10 +19,10 @@ export default function LandingPage() {
           <span className="font-heading font-bold text-2xl tracking-tight">FreeSoul</span>
         </div>
         <div className="flex items-center space-x-4">
-          <Link href="/login" className="text-sm font-bold text-wellness-navy hover:text-wellness-accent">
+          <Link href="/dashboard" className="text-sm font-bold text-wellness-navy hover:text-wellness-accent">
             Log In
           </Link>
-          <Link href="/login" className="bg-wellness-navy text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-soft hover:bg-wellness-navy/90 transition-all">
+          <Link href="/dashboard" className="bg-wellness-navy text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-soft hover:bg-wellness-navy/90 transition-all">
             Get Started
           </Link>
         </div>
@@ -41,7 +41,7 @@ export default function LandingPage() {
           A safe, encrypted space to understand your feelings, reflect without judgment, and share structured wellness reports with professionals when you choose.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Link href="/login" className="w-full sm:w-auto bg-wellness-navy text-white px-8 py-4 rounded-2xl font-bold text-base shadow-soft hover:bg-wellness-navy/90 transition-all flex items-center justify-center space-x-2">
+          <Link href="/dashboard" className="w-full sm:w-auto bg-wellness-navy text-white px-8 py-4 rounded-2xl font-bold text-base shadow-soft hover:bg-wellness-navy/90 transition-all flex items-center justify-center space-x-2">
             <span>Start Your Journey</span>
             <ArrowRight className="w-5 h-5" />
           </Link>

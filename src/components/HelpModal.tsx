@@ -14,7 +14,7 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-wellness-navy/40 backdrop-blur-sm p-4 animate-fadeIn">
-      <div className="bg-wellness-card w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl border border-wellness-lavender flex flex-col overflow-hidden">
+      <div role="dialog" aria-modal="true" aria-labelledby="support-title" className="bg-wellness-card w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl border border-wellness-lavender flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-wellness-navy text-white p-6 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -22,7 +22,7 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
               <ShieldAlert className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-heading font-bold">Support & Crisis Resource Center</h2>
+              <h2 id="support-title" className="text-xl font-heading font-bold">Support & Crisis Resource Center</h2>
               <p className="text-xs text-wellness-lavender/80">You are not alone. Confidential help is available 24/7.</p>
             </div>
           </div>
@@ -35,7 +35,7 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-wellness-lavender bg-wellness-bg/50 px-6 pt-3 space-x-4">
+        <div role="group" aria-label="Support topics" className="flex overflow-x-auto border-b border-wellness-lavender bg-wellness-bg/50 px-3 sm:px-6 pt-3 gap-1 sm:gap-4">
           {[
             { id: 'immediate', label: 'Immediate Crisis', icon: ShieldAlert },
             { id: 'professionals', label: 'College Counselors', icon: HeartHandshake },
@@ -46,6 +46,7 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
             return (
               <button
                 key={tab.id}
+                  aria-pressed={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 pb-3 px-3 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id

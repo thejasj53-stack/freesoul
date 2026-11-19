@@ -8,14 +8,14 @@ module.exports = {
     extend: {
       colors: {
         wellness: {
-          bg: "#FAF8F5",       // Warm off-white
-          card: "#FFFFFF",
-          lavender: "#E6E2EE",  // Soft lavender
-          sage: "#D8E2DC",      // Muted sage green
-          sageDark: "#94A399",
-          navy: "#1E2530",      // Deep midnight blue
-          accent: "#8B7EC8",
-          blush: "#F9EBEA",
+          bg: "#090b12",
+          card: "#131622",
+          lavender: "#b6adff",
+          sage: "#9ff4dd",
+          sageDark: "#a1a6bc",
+          navy: "#eef0fa",
+          accent: "#a99bff",
+          blush: "#39202c",
         }
       },
       fontFamily: {

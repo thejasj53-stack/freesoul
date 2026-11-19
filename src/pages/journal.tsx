@@ -1,47 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import HelpModal from '../components/HelpModal';
-import { BookOpen, Lock, Plus, Trash2 } from 'lucide-react';
+import { Lock, Trash2 } from 'lucide-react';
 import { JournalEntry } from '../types';
+import { localData } from '../lib/localData';
 
 export default function JournalPage() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [entries, setEntries] = useState<JournalEntry[]>([
-    {
-      id: '1',
-      user_id: 'u1',
-      title: 'Reflections on Midterms',
-      content: 'Felt quite overwhelmed this afternoon before the chemistry exam, but taking a 15-minute walk helped clear my head.',
-      tags: ['Exams', 'Coping'],
-      is_private: true,
-      created_at: '2025-05-02',
-      updated_at: '2025-05-02'
-    }
-  ]);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleCreateEntry = (e: React.FormEvent) => {
+  useEffect(() => {
+    setEntries(localData.getJournal());
+    setIsLoading(false);
+  }, []);
+
+  const handleCreateEntry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !content) return;
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      user_id: 'u1',
-      title,
-      content,
-      tags: ['Personal'],
-      is_private: true,
-      created_at: new Date().toISOString().split('T')[0],
-      updated_at: new Date().toISOString().split('T')[0],
-    };
-    setEntries([newEntry, ...entries]);
-    setTitle('');
-    setContent('');
+    if (!title.trim() || !content.trim()) return;
+    setIsSaving(true); setError('');
+    const now = new Date().toISOString();
+    const data: JournalEntry = { id: crypto.randomUUID(), user_id: 'local', title: title.trim(), content: content.trim(), tags: ['Personal'], is_private: true, created_at: now, updated_at: now };
+    try { localData.addJournal(data); }
+    catch { setError('Could not save locally. Check available browser storage.'); setIsSaving(false); return; }
+    setIsSaving(false);
+    setEntries((prev) => [data, ...prev]); setTitle(''); setContent('');
   };
 
-  const handleDelete = (id: string) => {
-    setEntries(entries.filter(e => e.id !== id));
+  const handleDelete = async (id: string) => {
+    setError('');
+    localData.deleteJournal(id);
+    setEntries((prev) => prev.filter((entry) => entry.id !== id));
   };
 
   return (
@@ -98,7 +92,7 @@ export default function JournalPage() {
                 type="submit"
                 className="w-full bg-wellness-navy text-white py-3.5 rounded-xl font-bold text-sm shadow-soft hover:bg-wellness-navy/90 transition-all"
               >
-                Save Private Entry
+                {isSaving ? 'Saving…' : 'Save Private Entry'}
               </button>
             </form>
           </div>
@@ -106,7 +100,10 @@ export default function JournalPage() {
           {/* Entries Feed */}
           <div className="bg-white p-8 rounded-3xl border border-wellness-lavender/60 shadow-card space-y-6">
             <h3 className="font-heading font-bold text-lg">Past Entries</h3>
+            {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
             <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+              {isLoading && <p className="text-sm text-wellness-sageDark">Loading your entries…</p>}
+              {!isLoading && entries.length === 0 && !error && <p className="text-sm text-wellness-sageDark">No journal entries yet. Your private reflections will appear here.</p>}
               {entries.map((entry) => (
                 <div key={entry.id} className="p-5 bg-wellness-bg border border-wellness-lavender rounded-2xl space-y-2">
                   <div className="flex justify-between items-start">

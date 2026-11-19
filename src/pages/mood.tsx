@@ -1,32 +1,50 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import HelpModal from '../components/HelpModal';
-import { Smile, Calendar, Plus, TrendingUp } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { localData } from '../lib/localData';
 import { MoodType, MoodEntry } from '../types';
+import LiveMoodCapture from '../components/LiveMoodCapture';
 
 export default function MoodPage() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [selectedMood, setSelectedMood] = useState<MoodType>('Calm');
   const [note, setNote] = useState('');
-  const [entries, setEntries] = useState<MoodEntry[]>([
-    { id: '1', user_id: 'u1', mood: 'Calm', score: 8, note: 'Had a peaceful morning walk.', tags: ['Nature', 'Sleep'], created_at: '2025-05-01' },
-    { id: '2', user_id: 'u1', mood: 'Anxious', score: 4, note: 'Upcoming midterm exams.', tags: ['Academics', 'Stress'], created_at: '2025-05-02' },
-  ]);
+  const [entries, setEntries] = useState<MoodEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSaveMood = (e: React.FormEvent) => {
+  useEffect(() => {
+    setEntries(localData.getMoods());
+    setIsLoading(false);
+  }, []);
+
+  const handleDetectedMood = useCallback((mood: MoodType, reflection: string) => {
+    setSelectedMood(mood);
+    setNote(reflection);
+  }, []);
+
+  const handleSaveMood = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEntry: MoodEntry = {
-      id: Date.now().toString(),
-      user_id: 'u1',
-      mood: selectedMood,
-      score: selectedMood === 'Happy' ? 9 : selectedMood === 'Anxious' ? 4 : 6,
-      note,
-      tags: ['Daily Check-in'],
-      created_at: new Date().toISOString().split('T')[0],
-    };
-    setEntries([newEntry, ...entries]);
-    setNote('');
+    setIsSaving(true); setError('');
+    const score = selectedMood === 'Happy' ? 9 : ['Sad', 'Anxious', 'Overwhelmed', 'Exhausted'].includes(selectedMood) ? 4 : 7;
+    const data: MoodEntry = { id: crypto.randomUUID(), user_id: 'local', mood: selectedMood, score, note: note.trim() || undefined, tags: ['Daily Check-in'], created_at: new Date().toISOString() };
+    try { localData.addMood(data); }
+    catch { setError('Could not save locally. Check available browser storage.'); setIsSaving(false); return; }
+    setIsSaving(false);
+    setEntries((prev) => [data, ...prev]); setNote('');
+  };
+
+  const handleDeleteMood = (id: string) => {
+    setError('');
+    try {
+      localData.deleteMood(id);
+      setEntries((prev) => prev.filter((entry) => entry.id !== id));
+    } catch {
+      setError('Could not delete this entry from local storage. Please try again.');
+    }
   };
 
   return (
@@ -43,6 +61,8 @@ export default function MoodPage() {
           <h1 className="text-3xl font-heading font-extrabold">Mood Tracker</h1>
           <p className="text-sm text-wellness-sageDark mt-1">Record your emotional state to understand your patterns over time.</p>
         </div>
+
+        <LiveMoodCapture onMoodDetected={handleDetectedMood} />
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Log Mood Form */}
@@ -77,7 +97,7 @@ export default function MoodPage() {
                 type="submit"
                 className="w-full bg-wellness-navy text-white py-3.5 rounded-xl font-bold text-sm shadow-soft hover:bg-wellness-navy/90 transition-all"
               >
-                Save Mood Entry
+                {isSaving ? 'Saving…' : 'Save Mood Entry'}
               </button>
             </form>
           </div>
@@ -85,14 +105,26 @@ export default function MoodPage() {
           {/* History List */}
           <div className="bg-white p-8 rounded-3xl border border-wellness-lavender/60 shadow-card space-y-6">
             <h3 className="font-heading font-bold text-lg">Recent Mood History</h3>
+            {error && <p className="text-sm text-rose-700" role="alert">{error}</p>}
             <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
+              {isLoading && <p className="text-sm text-wellness-sageDark">Loading your entries…</p>}
+              {!isLoading && entries.length === 0 && !error && <p className="text-sm text-wellness-sageDark">No mood entries yet. Your check-ins will appear here.</p>}
               {entries.map((entry) => (
-                <div key={entry.id} className="p-4 bg-wellness-bg border border-wellness-lavender rounded-2xl flex items-center justify-between">
+                <div key={entry.id} className="p-4 bg-wellness-bg border border-wellness-lavender rounded-2xl flex items-center justify-between gap-3">
                   <div>
                     <span className="font-bold text-wellness-navy text-base">{entry.mood}</span>
                     {entry.note && <p className="text-xs text-wellness-sageDark mt-1">{entry.note}</p>}
                     <span className="text-[10px] text-wellness-accent mt-2 block">{entry.created_at}</span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteMood(entry.id)}
+                    className="shrink-0 rounded-lg p-2 text-wellness-sageDark transition hover:bg-rose-50 hover:text-rose-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-500"
+                    aria-label={`Delete ${entry.mood} mood entry`}
+                    title="Delete mood entry"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>

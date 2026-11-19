@@ -51,7 +51,7 @@ export default function DashboardPage() {
                   className={`p-3 rounded-2xl text-sm font-medium border transition-all text-center ${
                     todaysMood === m
                       ? 'bg-wellness-navy text-white border-wellness-navy shadow-sm'
-                      : 'bg-wellness-bg border-wellness-lavendertag hover:border-wellness-accent text-wellness-navy'
+                      : 'bg-wellness-bg border-wellness-lavender hover:border-wellness-accent text-wellness-navy'
                   }`}
                 >
                   {m}
